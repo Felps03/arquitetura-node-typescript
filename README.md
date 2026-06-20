@@ -4,12 +4,12 @@
 
 API de exemplo construída com **Node.js**, **TypeScript**, **Express** e **MongoDB**, demonstrando uma arquitetura backend organizada em camadas, com separação de responsabilidades entre rotas, validações, controllers, services, repositories e schemas.
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square\&logo=node.js\&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-24.x-339933?style=flat-square\&logo=node.js\&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square\&logo=typescript\&logoColor=white)
 ![Express](https://img.shields.io/badge/Express.js-000000?style=flat-square\&logo=express\&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square\&logo=mongodb\&logoColor=white)
 ![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=flat-square\&logo=mongoose\&logoColor=white)
-![Joi](https://img.shields.io/badge/Joi-Validation-0052CC?style=flat-square)
+![Zod](https://img.shields.io/badge/Zod-3E67B1?style=flat-square&logo=zod&logoColor=white)
 ![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat-square\&logo=eslint\&logoColor=white)
 ![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=flat-square\&logo=prettier\&logoColor=black)
 
@@ -24,7 +24,7 @@ Este repositório é um estudo prático de **arquitetura backend com Node.js e T
 A proposta é demonstrar uma base simples, porém bem estruturada, para criação de APIs com:
 
 * Separação entre rota, validação, controller, service e repository
-* Validação de entrada com Joi
+* Validação de entrada com Zod
 * Persistência de dados com MongoDB e Mongoose
 * Configuração de ambiente com dotenv
 * Padronização de código com ESLint e Prettier
@@ -54,22 +54,15 @@ Este projeto pode servir como base de estudo para conceitos como:
 
 O fluxo principal da aplicação segue a seguinte estrutura:
 
-```text
-Request HTTP
-   ↓
-Route
-   ↓
-Validation
-   ↓
-Controller
-   ↓
-Service
-   ↓
-Repository
-   ↓
-Mongoose Schema
-   ↓
-MongoDB
+```mermaid
+flowchart TD
+    A[Request HTTP] --> B[Route]
+    B --> C[Validation]
+    C --> D[Controller]
+    D --> E[Service]
+    E --> F[Repository]
+    F --> G[Mongoose Schema]
+    G --> H[MongoDB]
 ```
 
 ### Responsabilidade de cada camada
@@ -129,7 +122,7 @@ src
 
 ### Validação e configuração
 
-* Joi
+* Zod
 * dotenv
 * cors
 
@@ -142,8 +135,8 @@ src
 
 ### Desenvolvimento
 
-* Nodemon
-* ts-node
+* Suporte nativo a TypeScript do Node.js 24 (type stripping), sem `typescript`, `ts-node` ou `nodemon`
+* `node --watch` para reiniciar a aplicação automaticamente em desenvolvimento
 
 ---
 
@@ -163,7 +156,7 @@ A camada de service centraliza a lógica da aplicação, facilitando manutençã
 
 ### Validação de entrada
 
-Antes de chegar ao controller, os dados da requisição passam por uma camada de validação utilizando Joi.
+Antes de chegar ao controller, os dados da requisição passam por uma camada de validação utilizando Zod.
 
 ### Persistência com MongoDB
 
@@ -175,9 +168,11 @@ O projeto utiliza Mongoose para modelagem e persistência dos dados no MongoDB.
 
 Antes de executar o projeto, você precisa ter instalado:
 
-* Node.js
+* Node.js `24.x` (versão definida em `.nvmrc` e em `engines` no `package.json`)
 * npm
 * MongoDB local ou uma instância MongoDB remota
+
+> Se você utiliza [nvm](https://github.com/nvm-sh/nvm), basta rodar `nvm use` na raiz do projeto para selecionar a versão correta do Node.js.
 
 ---
 
@@ -239,10 +234,35 @@ Caso `MONGO_DB_URL` não seja informada, o projeto utiliza uma URL local padrão
 
 ## Scripts disponíveis
 
-| Script            | Descrição                                              |
-| ----------------- | ------------------------------------------------------ |
-| `npm run dev`     | Inicia a aplicação em modo desenvolvimento com Nodemon |
-| `npm run prepare` | Instala/configura os hooks do Husky                    |
+| Script            | Descrição                                                          |
+| ----------------- | ------------------------------------------------------------------- |
+| `npm run dev`     | Inicia a aplicação em modo desenvolvimento com `node --watch`       |
+| `npm start`       | Inicia a aplicação em modo produção                                 |
+| `npm run prepare` | Instala/configura os hooks do Husky                                 |
+
+---
+
+## Versão do Node.js
+
+O projeto fixa a versão do Node.js em `24.x` através de:
+
+* `.nvmrc` — usado por ferramentas como [nvm](https://github.com/nvm-sh/nvm) para selecionar automaticamente a versão correta
+* `engines` no `package.json` — sinaliza a versão esperada para gerenciadores de pacote e ferramentas de CI/CD
+
+---
+
+## Execução nativa de TypeScript (sem `typescript`/`ts-node`)
+
+A partir da versão 24, o Node.js executa arquivos `.ts` nativamente através de **type stripping**: as anotações de tipo são removidas em tempo de execução, sem checagem de tipos e sem etapa de build. Por isso o projeto não depende mais de `typescript`, `ts-node` ou `nodemon`:
+
+* `npm run dev` → `node --watch ./src/server.ts`
+* `npm start` → `node ./src/server.ts`
+
+Pontos importantes dessa abordagem:
+
+* O `tsconfig.json` foi removido, pois o Node.js ignora esse arquivo
+* Os imports relativos precisam ser explícitos com a extensão `.ts` (ex.: `import App from './app.ts'`)
+* Imports usados apenas como tipo devem usar `import type` (ex.: `import type { IUser } from '../interfaces/IUser.ts'`), já que o type stripping remove apenas o que é "erasable" — sintaxes como enums, namespaces com código em runtime, parâmetros de construtor com modificadores de acesso e decorators não são suportadas sem checagem/transpilação adicional
 
 ---
 
@@ -291,20 +311,14 @@ curl -X POST http://localhost:3000/user \
 
 ## Exemplo do fluxo de criação de usuário
 
-```text
-POST /user
-   ↓
-createValidation
-   ↓
-UserController.create
-   ↓
-UserService.create
-   ↓
-UserRepository.create
-   ↓
-UserSchema.create
-   ↓
-MongoDB
+```mermaid
+flowchart TD
+    A["POST /user"] --> B[createValidation]
+    B --> C[UserController.create]
+    C --> D[UserService.create]
+    D --> E[UserRepository.create]
+    E --> F[UserSchema.create]
+    F --> G[MongoDB]
 ```
 
 ---
@@ -324,9 +338,9 @@ router.post('/user', createValidation, UserController.create);
 Valida o payload antes que ele chegue ao controller.
 
 ```ts
-const schema = Joi.object({
-  name: Joi.string().required(),
-  age: Joi.number(),
+const schema = z.object({
+  name: z.string(),
+  age: z.number().optional(),
 });
 ```
 
@@ -350,14 +364,14 @@ Define o formato do documento salvo no MongoDB.
 
 ## Ponto de atenção
 
-Atualmente, o campo `age` é obrigatório no schema do Mongoose, mas não está marcado como obrigatório na validação com Joi.
+Atualmente, o campo `age` é obrigatório no schema do Mongoose, mas não está marcado como obrigatório na validação com Zod.
 
 Para manter consistência entre validação e persistência, uma melhoria recomendada seria ajustar a validação para:
 
 ```ts
-const schema = Joi.object({
-  name: Joi.string().required(),
-  age: Joi.number().required(),
+const schema = z.object({
+  name: z.string(),
+  age: z.number(),
 });
 ```
 
@@ -454,7 +468,7 @@ docker compose up -d
 ## Sugestão de descrição para o repositório
 
 ```text
-API Node.js + TypeScript com arquitetura em camadas usando Express, MongoDB, Mongoose, Joi e Repository Pattern.
+API Node.js + TypeScript com arquitetura em camadas usando Express, MongoDB, Mongoose, Zod e Repository Pattern.
 ```
 
 ---
@@ -472,7 +486,7 @@ backend
 architecture
 repository-pattern
 clean-code
-joi
+zod
 eslint
 prettier
 ```

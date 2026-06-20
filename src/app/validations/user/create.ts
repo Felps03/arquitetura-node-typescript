@@ -1,17 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
+import type { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const schema = Joi.object({
-      name: Joi.string().required(),
-      age: Joi.number()
-    });
+  const schema = z.object({
+    name: z.string(),
+    age: z.number().optional()
+  });
 
-    const { error } = await schema.validate(req.body, { abortEarly: true });
-    if (error) throw error;
-    return next();
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+  const { success, error } = await schema.safeParseAsync(req.body);
+  if (!success) return res.status(400).json(error);
+  return next();
 };

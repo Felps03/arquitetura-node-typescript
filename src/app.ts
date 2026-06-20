@@ -1,12 +1,10 @@
-import dotenv from 'dotenv';
+import { existsSync } from 'node:fs';
 import express from 'express';
 import cors from 'cors';
-import routes from './routes/index.router';
-import './infra/database/mongo/index';
+import routes from './routes/index.router.ts';
+import './infra/database/mongo/index.ts';
 
-dotenv.config({
-  path: '.env'
-});
+if (existsSync('.env')) process.loadEnvFile('.env');
 
 class App {
   public server: express.Application;

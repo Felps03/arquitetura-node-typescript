@@ -1,5 +1,5 @@
-import { IUser, IUserResponse } from '../interfaces/IUser';
-import UserSchema from '../schema/UserSchema';
+import type { IUser, IUserResponse } from '../interfaces/IUser.ts';
+import UserSchema from '../schema/UserSchema.ts';
 
 class UserRepository {
   async create(payload: IUser): Promise<IUserResponse> {
