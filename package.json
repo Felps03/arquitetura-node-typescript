@@ -1,17 +1,24 @@
 {
   "name": "arquitetura-node-typescript",
   "version": "1.0.0",
-  "description": "",
+  "description": "API de exemplo em Node.js 24 (TypeScript nativo, sem tsc) com arquitetura modular por domínio, Express, MongoDB, Zod e Swagger/OpenAPI.",
   "type": "module",
   "main": "src/server.ts",
   "engines": {
     "node": "24.x"
   },
+  "imports": {
+    "#modules/*.ts": "./src/modules/*.ts",
+    "#routes/*.ts": "./src/routes/*.ts",
+    "#shared/*.ts": "./src/shared/*.ts"
+  },
   "scripts": {
     "dev": "node --watch ./src/server.ts",
     "start": "node ./src/server.ts",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "test": "node --test",
+    "test:unit": "node --test \"test/unit/**/*.unit.test.ts\"",
+    "test:integration": "node --test \"test/integration/**/*.integration.test.ts\"",
+    "test:e2e": "node --test \"test/e2e/**/*.e2e.test.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
@@ -20,18 +27,20 @@
   "devDependencies": {
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
-    "eslint": "^8.57.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-prettier": "^5.5.6",
+    "@cspell/dict-pt-br": "^2.4.2",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.0.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "husky": "^9.1.7",
     "prettier": "^3.8.4"
   },
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mongoose": "^9.7.1",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.4.3"
   }
 }
